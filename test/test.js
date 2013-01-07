@@ -4,6 +4,10 @@ var a, b, c, YDOM = Y.DOM.NonExistingModule;
 
 var YScreen = YDOM.FakeModule;
 
+a = YDOM;
+
+a.XModule;
+
 var listLinks;
 
 var overlay = new Y.Overlay({
