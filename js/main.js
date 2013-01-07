@@ -30,6 +30,8 @@ Y.each(
 			function (value, key, processedItem) {
 				if (value === 'MemberExpression') {
 					processMemeberExpression(processedItem);
+				} else if (value === 'ExpressionStatement') {
+					processExpressionStatement(processedItem);
 				} else if (value === 'VariableDeclaration') {
 					processVariableDeclaration(processedItem);
 				} else if (Lang.isObject(value) || Lang.isArray(value)) {
@@ -95,6 +97,34 @@ function getValidIdentifier(obj) {
 	return false;
 }
 
+function processAssignmentExpression(expression) {
+	var leftExpression, rightIdentifier, rightStatement;
+
+	rightStatement = expression.right;
+
+	if (rightStatement.type === 'Identifier') {
+		rightIdentifier = getValidIdentifier(rightStatement);
+
+		if (rightIdentifier && rightIdentifier !== 'Y') {
+			leftExpression = expression.left;
+
+			if (leftExpression.type === 'Identifier') {
+				identifiers[leftExpression.name] = identifiers[rightIdentifier];
+			}
+		}
+	}
+}
+
+function processExpressionStatement(item) {
+	var expression;
+
+	expression = item.expression;
+
+	if (expression.type === 'AssignmentExpression' && expression.operator === '=') {
+		processAssignmentExpression(item.expression);
+	}
+}
+
 function processMemeberExpression(item) {
 	var identifier, obj, prop, result;
 
@@ -139,7 +169,7 @@ function processVariableDeclaration(item) {
 	);
 }
 
-function resolveModules (modules) {
+function resolveModules(modules) {
 	var requiredModules = [];
 
 	modules = Y.each(
