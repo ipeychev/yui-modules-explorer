@@ -29,7 +29,7 @@ Y.each(
 			item,
 			function (value, key, processedItem) {
 				if (value === 'MemberExpression') {
-					processMemeberExpression(processedItem);
+					processMemberExpression(processedItem);
 				} else if (value === 'ExpressionStatement') {
 					processExpressionStatement(processedItem);
 				} else if (value === 'VariableDeclaration') {
@@ -125,14 +125,14 @@ function processExpressionStatement(item) {
 	}
 }
 
-function processMemeberExpression(item) {
+function processMemberExpression(item) {
 	var identifier, obj, prop, result;
 
 	obj = item.object;
 	prop = item.property;
 
 	if (Lang.isObject(obj) && obj.type === 'MemberExpression') {
-		result = processMemeberExpression(obj);
+		result = processMemberExpression(obj);
 
 		if (result) {
 			result = addProperty(prop, result);
@@ -158,7 +158,7 @@ function processVariableDeclaration(item) {
 				init = item.init;
 
 				if (init && init.type === 'MemberExpression') {
-					result = processMemeberExpression(init);
+					result = processMemberExpression(init);
 
 					identifier = item.id.name;
 
