@@ -126,26 +126,17 @@ function processExpressionStatement(item) {
 }
 
 function processMemberExpression(item) {
-	var identifier, obj, prop, result;
+	var identifier, obj, out, prop, result;
 
-	obj = item.object;
-	prop = item.property;
+	debugger;
 
-	if (Lang.isObject(obj) && obj.type === 'MemberExpression') {
-		result = processMemberExpression(obj);
+	out = {
+		identifier: null
+	};
 
-		if (result) {
-			result = addProperty(prop, result);
-		}
-	} else {
-		identifier = getValidIdentifier(obj);
+	result = _processMemberExpression(item, out);
 
-		if (identifier) {
-			result = addProperty(prop, identifiers[identifier]);
-		}
-	}
-
-	return result;
+	return out;
 }
 
 function processVariableDeclaration(item) {
@@ -158,15 +149,39 @@ function processVariableDeclaration(item) {
 				init = item.init;
 
 				if (init && init.type === 'MemberExpression') {
-					result = processMemberExpression(init);
-
-					identifier = item.id.name;
-
-					identifiers[identifier] = result;
+					processMemberExpression(init);
 				}
 			}
 		}
 	);
+}
+
+function _processMemberExpression(item, out) {
+	var identifier, obj, prop, result;
+
+	debugger;
+
+	obj = item.object;
+	prop = item.property;
+
+	if (Lang.isObject(obj) && obj.type === 'MemberExpression') {
+		result = _processMemberExpression(obj, out);
+
+		result = addProperty(prop, result);
+	} else {
+		identifier = getValidIdentifier(obj);
+
+		if (identifier) {
+			result = addProperty(prop, identifiers[identifier]);
+
+			out.identifier = {
+				name: identifier,
+				value: result
+			};
+		}
+	}
+
+	return result;
 }
 
 function resolveModules(modules) {
