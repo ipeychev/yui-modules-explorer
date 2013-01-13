@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var a, b, c, YDOM = Y.DOM.NonExistingModule;
 
@@ -18,6 +18,10 @@ var overlay = new Y.Overlay({
 
 Y.one('#ac-input').plug(Y.Plugin.AutoComplete, {
 	source: ['foo', 'bar', 'baz']
+});
+
+Y.throttle(function() {
+	var a = Y.DOM;
 });
 
 listLinks.plug(

@@ -1,187 +1,179 @@
-/*global Y,YUI*/
-
-"use strict";
-
-var esprima = require('esprima');
+'use strict';
 
 var fs = require('fs');
 
+var esprima = require('esprima');
+
+var Traverse = require('./traverse');
+
 var code = fs.readFileSync('./test/test.js');
-
-var ast = esprima.parse(code);
-
-console.log(JSON.stringify(ast, null, 4));
 
 var Y = require('yui').use('oop', 'loader-base');
 
-var identifiers = {
+var ast = esprima.parse(code);
+
+var YUIAliases = {
+};
+
+var YUIClasses = {
 	Y: {}
 };
 
-var Lang = Y.Lang;
+var traverse = new Traverse(ast, new Visitor());
 
-var YObject = Y.Object;
+function Visitor() {
+	var alias, identifiers, value;
 
-Y.each(
-	ast.body,
-	function processsItem(item) {
-		YObject.each(
-			item,
-			function (value, key, processedItem) {
-				if (value === 'MemberExpression') {
-					processMemberExpression(processedItem);
-				} else if (value === 'ExpressionStatement') {
-					processExpressionStatement(processedItem);
-				} else if (value === 'VariableDeclaration') {
-					processVariableDeclaration(processedItem);
-				} else if (Lang.isObject(value) || Lang.isArray(value)) {
-					processsItem(value);
-				}
+	return {
+		enter: function(node, parent) {
+			if (node.type === 'MemberExpression') {
+				identifiers = processMemberExpression(node, parent);
+
+				addIdentifiers(identifiers);
+
+				return Traverse.VisitorOption.Skip;
 			}
-		);
-	}
-);
+			else if (node.type === 'VariableDeclarator' && node.init && node.init.type === 'MemberExpression') {
+				identifiers = processMemberExpression(node.init, node);
 
-function addProperty(prop, curPath) {
-	if (prop) {
-		var identifier = prop.name || prop.value;
+				value = addIdentifiers(identifiers);
 
-		if (!curPath[identifier]) {
-			curPath[identifier] = {};
+				alias = node.id.name;
+
+				addAlias(alias, value);
+
+				return Traverse.VisitorOption.Skip;
+			}
+			else if (node.type === 'ExpressionStatement' && node.expression) {
+				processExpressionStatement(node);
+			}
+		},
+
+		leave: function(node, parent) {
 		}
-
-		return curPath[identifier];
-	}
-
-	return null;
+	};
 }
 
-function extractModules(data, classes, parent) {
-	var modules = [];
+function addAlias(alias, value) {
+	if (!YUIClasses[alias]) {
+		YUIClasses[alias] = value;
+	}
+}
 
+function addIdentifiers(identifiers) {
+	var mainIdentifier = identifiers[0];
+
+	if (!YUIClasses[mainIdentifier]) {
+		return;
+	}
+
+	var identifierValue = YUIClasses[mainIdentifier];
+
+	for (var i = 1; i < identifiers.length; i++) {
+		var item = identifiers[i];
+
+		if (!identifierValue[item]) {
+			identifierValue[item] = {};
+		}
+
+		identifierValue = identifierValue[item];
+	}
+
+	return identifierValue;
+}
+
+function addYUIAliases(classItems) {
+	Y.each(
+		classItems,
+		function(item, index) {
+			if (item['class'] === 'YUI') {
+				YUIAliases[item.name] = {
+					module: item.module,
+					submodule: item.submodule
+				};
+			}
+		}
+	);
+}
+
+function extractModules(data, classes) {
+	var modules = _extractModules(data, classes);
+
+	modules = mergeYUIAliases(data, modules);
+
+	return modules;
+}
+
+function mergeYUIAliases(data, modules) {
 	Y.each(
 		data,
-		function (value, key, obj) {
-			var className = (parent ? parent + '.' : '') + key;
+		function(value, key) {
+			var alias = YUIAliases[key];
 
-			if (classes[className]) {
+			if (alias) {
 				modules.push(
 					{
-						className: className,
-						module: classes[className].module,
-						submodule: classes[className].submodule
+						className: 'YUI',
+						module: alias.module,
+						submodule: alias.submodule
 					}
 				);
 			}
-
-			var modules2 = extractModules(value, classes, className);
-
-			modules = modules.concat(modules2);
 		}
 	);
 
 	return modules;
 }
 
-function getValidIdentifier(obj) {
-	var hasOwnProp = Object.prototype.hasOwnProperty;
-
-	for (var item in identifiers) {
-		if (hasOwnProp.call(identifiers, item)) {
-			if (item === obj.name && obj.type === 'Identifier') {
-				return item;
-			}
-		}
-	}
-
-	return false;
-}
-
-function processAssignmentExpression(expression) {
+function processAssignmentExpression(node, parent) {
 	var leftExpression, rightIdentifier, rightStatement;
 
-	rightStatement = expression.right;
+	rightStatement = node.right;
 
 	if (rightStatement.type === 'Identifier') {
-		rightIdentifier = getValidIdentifier(rightStatement);
+		rightIdentifier = rightStatement.name || rightStatement.value;
 
-		if (rightIdentifier && rightIdentifier !== 'Y') {
-			leftExpression = expression.left;
+		if (rightIdentifier) {
+			leftExpression = node.left;
 
 			if (leftExpression.type === 'Identifier') {
-				identifiers[leftExpression.name] = identifiers[rightIdentifier];
+				YUIClasses[leftExpression.name] = YUIClasses[rightIdentifier];
 			}
 		}
 	}
 }
 
-function processExpressionStatement(item) {
-	var expression;
+function processExpressionStatement(node) {
+	var expression, identifiers;
 
-	expression = item.expression;
+	expression = node.expression;
 
-	if (expression.type === 'AssignmentExpression' && expression.operator === '=') {
-		processAssignmentExpression(item.expression);
+	if (expression.type === 'CallExpression') {
+		identifiers = processCallExpression(expression, node);
+
+		addIdentifiers(identifiers);
+	}
+	else if (expression.type === 'AssignmentExpression' && expression.operator === '=') {
+		processAssignmentExpression(expression, node);
 	}
 }
 
-function processMemberExpression(item) {
-	var identifier, obj, out, prop, result;
+function processMemberExpression(node, parent) {
+	var identifiers = [];
 
-	debugger;
+	_processMemberExpression(node, parent, identifiers);
 
-	out = {
-		identifier: null
-	};
-
-	result = _processMemberExpression(item, out);
-
-	return out;
+	return identifiers;
 }
 
-function processVariableDeclaration(item) {
-	var identifier, init, result;
+function processCallExpression(node, parent) {
+	var identifiers;
 
-	Y.each(
-		item.declarations,
-		function (item, index, obj) {
-			if (item.type === 'VariableDeclarator') {
-				init = item.init;
-
-				if (init && init.type === 'MemberExpression') {
-					processMemberExpression(init);
-				}
-			}
-		}
-	);
-}
-
-function _processMemberExpression(item, out) {
-	var identifier, obj, prop, result;
-
-	debugger;
-
-	obj = item.object;
-	prop = item.property;
-
-	if (Lang.isObject(obj) && obj.type === 'MemberExpression') {
-		result = _processMemberExpression(obj, out);
-
-		result = addProperty(prop, result);
-	} else {
-		identifier = getValidIdentifier(obj);
-
-		if (identifier) {
-			result = addProperty(prop, identifiers[identifier]);
-
-			out.identifier = {
-				name: identifier,
-				value: result
-			};
-		}
+	if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression') {
+		identifiers = processMemberExpression(node.callee, node);
 	}
 
-	return result;
+	return identifiers;
 }
 
 function resolveModules(modules) {
@@ -189,7 +181,7 @@ function resolveModules(modules) {
 
 	modules = Y.each(
 		modules,
-		function (item, index) {
+		function(item, index) {
 			requiredModules.push(item.submodule || item.module);
 		}
 	);
@@ -204,17 +196,53 @@ function resolveModules(modules) {
 	return loader.resolve(true);
 }
 
-console.log(JSON.stringify(identifiers, null, 4));
+function _extractModules(data, classes, parent) {
+	var modules = [];
+
+	Y.each(
+		data,
+		function(value, key, obj) {
+			var className = (parent ? parent + '.' : '') + key;
+
+			if (classes[className]) {
+				modules.push(
+					{
+						className: className,
+						module: classes[className].module,
+						submodule: classes[className].submodule
+					}
+				);
+			}
+
+			modules = modules.concat(_extractModules(value, classes, className));
+		}
+	);
+
+	return modules;
+}
+
+function _processMemberExpression(node, parent, identifiers) {
+	if (node.type === 'MemberExpression') {
+		_processMemberExpression(node.object, node, identifiers);
+
+		_processMemberExpression(node.property, node, identifiers);
+	}
+	else if (node.type === 'Identifier') {
+		identifiers.push(node.name || node.value);
+	}
+}
 
 var data = fs.readFileSync('data/data.json');
 
 data = JSON.parse(data);
 
-var classes = data.classes;
+var dataClasses = data.classes;
 
-var modules = extractModules(identifiers.Y, classes);
+var dataClassItems = data.classitems;
 
-console.log(JSON.stringify(modules, null, 4));
+addYUIAliases(dataClassItems);
+
+var modules = extractModules(YUIClasses.Y, dataClasses);
 
 var resolvedModules = resolveModules(modules);
 
