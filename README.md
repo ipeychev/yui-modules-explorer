@@ -58,7 +58,7 @@ Resolving the modules is easy - on NodeJS we just use YUI Loader programmaticall
 Status of the project
 -----------
 
-This is a weekend project, so don't expect much. Let's call it proof of a concept for now. It parses the files and resolves some relatively simple cases, like those above. It also is able to determine aliases, constructed by declaring variables.
+It parses the files and resolves some relatively simple cases, like those above. It also is able to determine aliases, constructed by declaring variables.
 
 For example:
 
@@ -74,17 +74,13 @@ test.plug(YDOM.MyModule);
 
 will work too.
 
-However, more work is needed. We have to parse expression statements, including those of type "CallExpression" and so one.
-
-The above means it currently does not parse methods, directly attached to Y instance. For example:
+Methods, directly attached to Y instance will be resolved too. For example:
 
 ```javascript
 Y.one(...)
 ```
 
-should match "node-core".
-
-(This shouldn't be hard to achieve).
+will match "node-core".
 
 Running the project
 -----------
@@ -92,8 +88,20 @@ Running the project
 1. Install NodeJS
 2. Install esprima (npm install esprima)
 3. Install YUI (npm install yui)
+4. Install Commander (npm install commander)
 4. Run "node js/main.js"
 
-There will be console output using the test data in test/test.js file
+Command line options (view these via node js/main.js -h)
+-----------
 
-This is everything I have this weekend :)
+node js/main.js -h
+
+Usage: main.js [options]
+
+Options:
+
+-f, --file [file name]          The file to parse and extract YUI modules. Defaults to the test file "./test/test.js"
+-d, --data [file name]          Path to YUI data.json file. If not specified, "./data/data.json" will be used.
+-y, --yui-variable [var1,var2]  The name of the global YUI variable(s). Defaults to Y. Might be single value or an array.
+-g, --generate-urls [false]     If specified, generate URLs using YUI Loader
+-V, --version                   output the version number
