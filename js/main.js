@@ -6,18 +6,36 @@ var esprima = require('esprima');
 
 var Traverse = require('./traverse');
 
-var code = fs.readFileSync('./test/test.js');
-
 var Y = require('yui').use('oop', 'loader-base');
+
+function list(value) {
+	return value.split(',').map(String);
+}
+
+var program = require('commander');
+
+program
+  .version('0.0.1')
+  .option('-f, --file [file name]', 'The file to parse and extract YUI modules. Defaults to the test file "./test/test.js"', './test/test.js')
+  .option('-d, --data [file name]', 'Path to YUI data.json file. If not specified, "./data/data.json" will be used.', './data/data.json')
+  .option('-y, --yui-variable [var1,var2]', 'The name of the global YUI variable(s). Defaults to Y. Might be single value or an array.', list, ['Y'])
+  .option('-g, --generate-urls [false]', 'If specified, generate URLs using YUI Loader', false)
+  .parse(process.argv);
+
+var code = fs.readFileSync(program.file);
 
 var ast = esprima.parse(code);
 
-var YUIAliases = {
-};
+var YUIAliases = {};
 
-var YUIClasses = {
-	Y: {}
-};
+var YUIClasses = {};
+
+Y.each(
+	program.yuiVariable,
+	function(item) {
+		YUIClasses[item] = {};
+	}
+);
 
 var traverse = new Traverse(ast, new Visitor());
 
@@ -232,7 +250,7 @@ function _processMemberExpression(node, parent, identifiers) {
 	}
 }
 
-var data = fs.readFileSync('data/data.json');
+var data = fs.readFileSync(program.data);
 
 data = JSON.parse(data);
 
@@ -244,8 +262,12 @@ addYUIAliases(dataClassItems);
 
 var modules = extractModules(YUIClasses.Y, dataClasses);
 
-var resolvedModules = resolveModules(modules);
+console.log('Used modules:\n' + JSON.stringify(modules, null, 4));
 
-console.log('Resolved JS modules:\n' + JSON.stringify(resolvedModules.js, null, 4));
+if (program.generateUrls) {
+	var resolvedModules = resolveModules(modules);
 
-console.log('Resolved CSS modules:\n' + JSON.stringify(resolvedModules.css, null, 4));
+	console.log('Resolved JS modules:\n' + JSON.stringify(resolvedModules.js, null, 4));
+
+	console.log('Resolved CSS modules:\n' + JSON.stringify(resolvedModules.css, null, 4));
+}
