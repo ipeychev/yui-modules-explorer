@@ -101,7 +101,11 @@ Usage: main.js [options]
 Options:
 
 -f, --file [file name]          The file to parse and extract YUI modules. Defaults to the test file "./test/test.js"
+
 -d, --data [file name]          Path to YUI data.json file. If not specified, "./data/data.json" will be used.
+
 -y, --yui-variable [var1,var2]  The name of the global YUI variable(s). Defaults to Y. Might be single value or an array.
+
 -g, --generate-urls [false]     If specified, generate URLs using YUI Loader
+
 -V, --version                   output the version number
