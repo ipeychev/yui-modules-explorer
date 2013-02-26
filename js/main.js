@@ -149,7 +149,7 @@ function processAssignmentExpression(node, parent) {
 	rightStatement = node.right;
 
 	if (rightStatement.type === 'Identifier') {
-		rightIdentifier = rightStatement.name || rightStatement.value;
+		rightIdentifier = rightStatement.name;
 
 		if (rightIdentifier) {
 			leftExpression = node.left;
@@ -246,7 +246,7 @@ function _processMemberExpression(node, parent, identifiers) {
 		_processMemberExpression(node.property, node, identifiers);
 	}
 	else if (node.type === 'Identifier') {
-		identifiers.push(node.name || node.value);
+		identifiers.push(node.name);
 	}
 }
 
