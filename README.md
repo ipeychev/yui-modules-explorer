@@ -1,4 +1,4 @@
-YUI Modules Explorer: Automatically discover the required YUI3 modules from JavaScript sources
+YUI Modules Explorer: Automatically discover the required YUI3 modules from JavaScript source files
 ========================================
 
 Modules Explorer is a project which tries to save the developer from the monkey job of finding and populating the required YUI modules in JavaScript sources. What it does is to parse the JavaScript files using [esprima](http://esprima.org/) JavaScript parser and to match the used YUI classes to the required modules.
@@ -23,56 +23,26 @@ var overlay = new Y.Overlay({
 });
 ```
 
-In this case Y.Overlay is used. The required module should be "overlay"
+In this case Y.Overlay is used. The required module should be "overlay".
 
-A more complex example might be this one:
+##### Resolving modules from values of class attributes:
 
 ```javascript
-Y.one('#ac-input').plug(Y.Plugin.AutoComplete, {
+var YP = Y.Plugin;
+
+var YPA = YP.AutoComplete;
+
+Y.one('#ac-input').plug(YPA, {
+	resultFilters : ['phraseMatch', 'phraseMatchCase'],
+    resultHighlighter: 'phraseMatchCase',
 	source: ['foo', 'bar', 'baz']
 });
 ```
 
-Here the required module should be "autocomplete-plugin"
+The above is a relatively complex example, because we have:
 
-
-The last example:
-
-```javascript
-listLinks.plug(
-	Y.Plugin.Drop,
-	{
-		bubbleTargets: '1'
-	}
-);
-```
-
-Here we need "dd-drop-plugin" module.
-
-Resolving the modules
------------
-
-Resolving the modules is easy - on NodeJS we just use YUI Loader programmatically and we can not only determine the modules, but to generate the full URL.
-
-
-Status of the project
------------
-
-It parses the files and resolves some relatively simple cases, like those above. It also is able to determine aliases, constructed by declaring variables.
-
-For example:
-
-```javascript
-var YDOM = Y.DOM;
-```
-
-and then:
-
-```javascript
-test.plug(YDOM.MyModule);
-```
-
-will work too.
+1. Aliases, constructed by declaring variables - "var YP = Y.Plugin;" and "var YPA = YP.AutoComplete;"
+2. Some modules should be resolved by matching the values of class **attributes**. In the above example, 'phraseMatch' and 'phraseMatchCase' require "autocomplete-filters" module in addition to "autocomplete-plugin".
 
 Methods, directly attached to Y instance will be resolved too. For example:
 
@@ -81,6 +51,12 @@ Y.one(...)
 ```
 
 will match "node-core".
+
+Resolving the modules
+-----------
+
+Resolving the modules is easy - on NodeJS we just use YUI Loader programmatically and we can not only determine the modules, but to generate the full URL.
+
 
 Running the project
 -----------
@@ -109,3 +85,14 @@ Options:
 -g, --generate-urls [false]     If specified, generate URLs using YUI Loader
 
 -V, --version                   output the version number
+
+
+Changelog
+-----------
+
+ver 0.0.2
+- Resolve modules from class attributes
+
+
+Current version - 0.0.2
+-----------

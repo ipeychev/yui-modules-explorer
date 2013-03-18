@@ -1,3 +1,7 @@
+var YP = Y.Plugin;
+
+var YPA = YP.AutoComplete;
+
 'use strict';
 
 var a, b, c, YDOM = Y.DOM.NonExistingModule;
@@ -16,10 +20,6 @@ var overlay = new Y.Overlay({
 	width: '20em'
 });
 
-Y.one('#ac-input').plug(Y.Plugin.AutoComplete, {
-	source: ['foo', 'bar', 'baz']
-});
-
 Y.throttle(function() {
 	var a = Y.DOM;
 });
@@ -32,3 +32,29 @@ listLinks.plug(
 );
 
 var a = YDOM.TestModule;
+
+var ac = new Y.AutoComplete({
+	resultFilters : ['phraseMatch', 'phraseMatchCase'],
+	resultHighlighter: 'phraseMatchCase',
+	inputNode: '#ac-input',
+	source : ['friends', 'Romans', 'countrymen']
+});
+
+var ac = new YPA({
+	resultFilters : ['phraseMatch', 'phraseMatchCase'],
+	resultHighlighter: 'phraseMatchCase',
+	inputNode: '#ac-input',
+	source : ['friends', 'Romans', 'countrymen']
+});
+
+Y.one('#ac-input').plug(Y.Plugin.AutoComplete, {
+	resultFilters : ['phraseMatch', 'phraseMatchCase'],
+    resultHighlighter: 'phraseMatchCase',
+	source: ['foo', 'bar', 'baz']
+});
+
+Y.one('#ac-input').plug(YPA, {
+	resultFilters : ['phraseMatch', 'phraseMatchCase'],
+    resultHighlighter: 'phraseMatchCase',
+	source: ['foo', 'bar', 'baz']
+});
