@@ -65,7 +65,9 @@ Running the project
 2. Install esprima (npm install esprima)
 3. Install YUI (npm install yui)
 4. Install Commander (npm install commander)
-4. Run "node js/main.js"
+5. Run "node js/main.js"
+
+If you run main.js without options, it will print the result of parsing the example file in "test" folder.
 
 Command line options (view these via node js/main.js -h)
 -----------
