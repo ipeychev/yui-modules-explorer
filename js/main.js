@@ -9,18 +9,18 @@ var Y = require('yui').use('oop', 'loader-base');
 var FileParser = require('./file-parser');
 
 function list(value) {
-	return value.split(',').map(String);
+    return value.split(',').map(String);
 }
 
 var modulesMap = [
-	{
-		'class': 'AutoCompleteFilters',
-		variable: ['AutoComplete']
-	},
-	{
-		'class': 'AutoCompleteFilters',
-		variable: ['Plugin', 'AutoComplete']
-	}
+    {
+        'class': 'AutoCompleteFilters',
+        variable: ['AutoComplete']
+    },
+    {
+        'class': 'AutoCompleteFilters',
+        variable: ['Plugin', 'AutoComplete']
+    }
 ];
 
 program
@@ -38,38 +38,38 @@ program
  var yuiClasses = [];
 
 program.yuiVariable.forEach(
-	function(item, index) {
-		yuiClasses[item] = Object.create(null);
+    function(item, index) {
+        yuiClasses[item] = Object.create(null);
 
-		modulesMap.forEach(
-			function(globalVar) {
-				globalVar.variable.unshift(item);
+        modulesMap.forEach(
+            function(globalVar) {
+                globalVar.variable.unshift(item);
 
-				modulesByProperties.push(globalVar);
-			}
-		);
-	}
+                modulesByProperties.push(globalVar);
+            }
+        );
+    }
 );
 
 modulesMap = null;
 
 function resolveModules(modules) {
-	var loader, requiredModules = [];
+    var loader, requiredModules = [];
 
-	modules.forEach(
-		function(item, index) {
-			requiredModules.push(item.submodule || item.module);
-		}
-	);
+    modules.forEach(
+        function(item, index) {
+            requiredModules.push(item.submodule || item.module);
+        }
+    );
 
-	loader = new Y.Loader(
-		{
-			combine: true,
-			require: requiredModules
-		}
-	);
+    loader = new Y.Loader(
+        {
+            combine: true,
+            require: requiredModules
+        }
+    );
 
-	return loader.resolve(true);
+    return loader.resolve(true);
 }
 
 var data = fs.readFileSync(program.json);
@@ -79,11 +79,11 @@ data = JSON.parse(data);
 var code = fs.readFileSync(program.file);
 
 var fileParser = new FileParser(
-	{
-		data: data,
-		modulesByProperties: modulesByProperties,
-		yuiClasses: yuiClasses
-	}
+    {
+        data: data,
+        modulesByProperties: modulesByProperties,
+        yuiClasses: yuiClasses
+    }
 );
 
 var modules = fileParser.parse(code);
@@ -91,9 +91,9 @@ var modules = fileParser.parse(code);
 console.log('Used modules:\n' + JSON.stringify(modules, null, 4));
 
 if (program.generateUrls) {
-	var resolvedModules = resolveModules(modules);
+    var resolvedModules = resolveModules(modules);
 
-	console.log('Resolved JS modules:\n' + JSON.stringify(resolvedModules.js, null, 4));
+    console.log('Resolved JS modules:\n' + JSON.stringify(resolvedModules.js, null, 4));
 
-	console.log('Resolved CSS modules:\n' + JSON.stringify(resolvedModules.css, null, 4));
+    console.log('Resolved CSS modules:\n' + JSON.stringify(resolvedModules.css, null, 4));
 }
