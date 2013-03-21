@@ -110,8 +110,6 @@ program.file.forEach(
 
                 var modules = fileParser.parse(content);
 
-                debugger;
-
                 if (passed) {
                     stream.write(',');
                 }
