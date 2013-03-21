@@ -62,10 +62,11 @@ Running the project
 -----------
 
 1. Install NodeJS
-2. Install esprima (npm install esprima)
-3. Install YUI (npm install yui)
-4. Install Commander (npm install commander)
-5. Run "node js/main.js"
+2. Install esprima - npm install esprima
+3. Install YUI - npm install yui
+4. Install Commander - npm install commander
+5. Install walkdir - npm install walkdir
+6. Run "node js/main.js"
 
 If you run main.js without options, it will print the result of parsing the example file in "test" folder.
 
@@ -78,13 +79,17 @@ Usage: main.js [options]
 
 Options:
 
--f, --file [file name]          The file to parse and extract YUI modules. Defaults to the test file "./test/test.js"
+-f, --file [file name]          The file to parse and extract YUI modules. Defaults to the test file "./test/test.js".
 
--d, --data [file name]          Path to YUI data.json file. If not specified, "./data/data.json" will be used.
+-d, --dir  [directory name]     The directory to traverse and extract YUI modules. Defaults to the current folder.
+
+-e, --ext  [file extensions]    The file extensions which should be parsed. Defaults to "js".
+
+-j, --json [file name]          Path to YUI data.json file. If not specified, "./data/data.json" will be used.
 
 -y, --yui-variable [var1,var2]  The name of the global YUI variable(s). Defaults to Y. Might be single value or an array.
 
--g, --generate-urls [false]     If specified, generate URLs using YUI Loader
+-g, --generate-urls [false]     If specified, generate URLs using YUI Loader.
 
 -V, --version                   output the version number
 
@@ -96,5 +101,5 @@ ver 0.0.2
 - Resolve modules from class attributes
 
 
-Current version - 0.0.2
+Current version - 0.0.3
 -----------
