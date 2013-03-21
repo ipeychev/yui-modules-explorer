@@ -103,7 +103,7 @@ program.file.forEach(
             fileName,
             function(err, content) {
                 if (err) {
-                    console.log('Cannot read file: ' + program.file + '. Reason: ' + err);
+                    console.log('Cannot read file: ' + program.file + '.\n' + err);
 
                     return;
                 }
