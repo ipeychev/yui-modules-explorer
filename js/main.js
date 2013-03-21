@@ -8,6 +8,8 @@ var program = require('commander');
 
 var FileParser = require('./file-parser');
 
+var OutputWriter = require('./output');
+
 function list(value) {
     return value.split(',').map(String);
 }
@@ -69,12 +71,12 @@ var stream = fs.createWriteStream(
 stream.once(
     'open',
     function(fd) {
-        stream.write('{\n');
+        outputWriter.writeStart();
 
         process.on(
             'exit',
             function() {
-                stream.write('}\n');
+                outputWriter.writeEnd();
 
                 stream.end();
             }
@@ -92,10 +94,12 @@ var fileParser = new FileParser(
     }
 );
 
-var passed;
-
-var indent = new Array(5).join(' ');
-var indent2x = indent + indent;
+var outputWriter = new OutputWriter(
+    {
+        classes: program.classes,
+        stream: stream
+    }
+);
 
 program.file.forEach(
     function(fileName) {
@@ -110,40 +114,7 @@ program.file.forEach(
 
                 var modules = fileParser.parse(content);
 
-                if (passed) {
-                    stream.write(',');
-                }
-
-                stream.write(indent + '"' + fileName + '": {\n');
-
-                var classes = '';
-                var moduleNames = '';
-
-                modules.forEach(
-                    function(module) {
-                        if (program.classes) {
-                            if (classes) {
-                                classes += ', ';
-                            }
-
-                            classes += module.className;
-                        }
-
-                        if (moduleNames) {
-                            moduleNames += ', ';
-                        }
-
-                        moduleNames += module.submodule ? module.submodule : module.module;
-                    }
-                );
-
-                if (program.classes) {
-                    stream.write(indent2x + '"classes": "' + classes + '",\n');
-                }
-
-                stream.write(indent2x + '"modules": "' + moduleNames + '"\n' + indent + '}\n');
-
-                passed = true;
+                outputWriter.write(fileName, modules, stream);
             }
         );
     }
