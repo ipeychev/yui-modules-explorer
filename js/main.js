@@ -2,9 +2,9 @@
 
 var fs = require('fs');
 
-var program = require('commander');
+var walk = require('walkdir');
 
-var Y = require('yui').use('oop', 'loader-base');
+var program = require('commander');
 
 var FileParser = require('./file-parser');
 
@@ -24,8 +24,10 @@ var modulesMap = [
 ];
 
 program
-  .option('-f, --file [file name]', 'The file to parse and extract YUI modules. Defaults to the test file "./test/test.js"', './test/test.js')
+  .option('-f, --file [file name]', 'The file to parse and extract YUI modules.', list)
   .option('-d, --dir [directory name]', 'The directory to traverse and extract YUI modules. Defaults to the current folder.', '.')
+  .option('-c, --classes [export classes]', 'Export class names in addition to modules', true)
+  .option('-o, --out [file name]', 'The ouput file in which the information about found modules should be stored', 'modules.json')
   .option('-e, --ext [file extensions]', 'The file extensions which should be parsed. Defaults to "js".', 'js')
   .option('-j, --json [file name]', 'Path to YUI data.json file. If not specified, "./data/data.json" will be used.', './data/data.json')
   .option('-y, --yui-variable [var1,var2]', 'The name of the global YUI variable(s). Defaults to Y. Might be single value or an array.', list, ['Y'])
@@ -53,30 +55,34 @@ program.yuiVariable.forEach(
 
 modulesMap = null;
 
-function resolveModules(modules) {
-    var loader, requiredModules = [];
-
-    modules.forEach(
-        function(item, index) {
-            requiredModules.push(item.submodule || item.module);
-        }
-    );
-
-    loader = new Y.Loader(
-        {
-            combine: true,
-            require: requiredModules
-        }
-    );
-
-    return loader.resolve(true);
-}
-
 var data = fs.readFileSync(program.json);
 
 data = JSON.parse(data);
 
-var code = fs.readFileSync(program.file);
+var stream = fs.createWriteStream(
+    program.out,
+    {
+        encoding: 'utf8'
+    }
+);
+
+stream.once(
+    'open',
+    function(fd) {
+        stream.write('{\n');
+
+        process.on(
+            'exit',
+            function() {
+                stream.write('}\n');
+
+                stream.end();
+            }
+        );
+    }
+);
+
+// 1. Extract modules from all passed files
 
 var fileParser = new FileParser(
     {
@@ -86,14 +92,61 @@ var fileParser = new FileParser(
     }
 );
 
-var modules = fileParser.parse(code);
+var passed;
 
-console.log('Used modules:\n' + JSON.stringify(modules, null, 4));
+var indent = new Array(5).join(' ');
+var indent2x = indent + indent;
 
-if (program.generateUrls) {
-    var resolvedModules = resolveModules(modules);
+program.file.forEach(
+    function(fileName) {
+        fs.readFile(
+            fileName,
+            function(err, content) {
+                if (err) {
+                    console.log('Cannot read file: ' + program.file + '. Reason: ' + err);
 
-    console.log('Resolved JS modules:\n' + JSON.stringify(resolvedModules.js, null, 4));
+                    return;
+                }
 
-    console.log('Resolved CSS modules:\n' + JSON.stringify(resolvedModules.css, null, 4));
-}
+                var modules = fileParser.parse(content);
+
+                debugger;
+
+                if (passed) {
+                    stream.write(',');
+                }
+
+                stream.write(indent + '"' + fileName + '": {\n');
+
+                var classes = '';
+                var moduleNames = '';
+
+                modules.forEach(
+                    function(module) {
+                        if (program.classes) {
+                            if (classes) {
+                                classes += ', ';
+                            }
+
+                            classes += module.className;
+                        }
+
+                        if (moduleNames) {
+                            moduleNames += ', ';
+                        }
+
+                        moduleNames += module.submodule ? module.submodule : module.module;
+                    }
+                );
+
+                if (program.classes) {
+                    stream.write(indent2x + '"classes": "' + classes + '",\n');
+                }
+
+                stream.write(indent2x + '"modules": "' + moduleNames + '"\n' + indent + '}\n');
+
+                passed = true;
+            }
+        );
+    }
+);
