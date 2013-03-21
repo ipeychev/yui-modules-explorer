@@ -202,6 +202,9 @@ FileParser.prototype = {
         if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression') {
             identifiers = this._processMemberExpression(node.callee, node);
         }
+        else if(node.type === 'CallExpression' && node.callee.type === 'Identifier') {
+            identifiers = [node.callee.name];
+        }
 
         return identifiers;
     },
@@ -230,6 +233,10 @@ FileParser.prototype = {
 
         if (expression.type === 'CallExpression') {
             identifiers = this._processCallExpression(expression, node);
+
+            if (!identifiers) {
+                debugger;
+            }
 
             this._addIdentifiers(identifiers);
 
