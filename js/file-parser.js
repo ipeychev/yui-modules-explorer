@@ -476,8 +476,6 @@ FileParser.prototype._resolveModules = function() {
 
     dataClassItems.forEach(
         function(item, index) {
-            this._addAlias(item);
-
             this._resolveModulesByClassProperties(item, this._classProperties, modulesFromClassProperties);
         },
         this
