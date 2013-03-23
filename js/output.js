@@ -14,10 +14,10 @@ OutputWriter.prototype = {
         this._config.stream.write('{\n');
     },
 
-    write: function(fileName, modules) {
+    write: function(modules, data) {
         var stream = this._config.stream;
 
-        stream.write((this._passed ? ',\n' : '\n') + this._indent + '"' + fileName + '": {\n');
+        stream.write((this._passed ? ',\n' : '\n') + this._indent + '"' + data.name + '": {\n');
 
         var classes = {};
         var moduleNames = {};
@@ -43,7 +43,7 @@ OutputWriter.prototype = {
     },
 
     writeEnd: function() {
-        this._config.stream.write('}\n');
+        this._config.stream.write('\n}');
     }
 };
 

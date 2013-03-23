@@ -41,9 +41,11 @@ if (!program.file && !program.dir) {
     process.exit();
 }
 
- var modulesByProperties = [];
-
- var yuiClasses = [];
+var modulesByProperties = [];
+var yuiClasses = [];
+var totalFileCounter = 0;
+var parsedFileCounter = 0;
+var failedFileCounter = 0;
 
 program.yuiVariable.forEach(
     function(item, index) {
@@ -107,6 +109,16 @@ stream.once(
                 outputWriter.writeEnd();
 
                 stream.end();
+
+                function getSuffix(counter) {
+                    return counter > 1 ? 's' : '';
+                }
+
+                console.log(
+                    'Successfully parsed: ' + parsedFileCounter + ' file' + getSuffix(parsedFileCounter) + '\n' +
+                    'Failed: ' + failedFileCounter + ' files\n' +
+                    'Total: ' + totalFileCounter + ' file' + getSuffix(totalFileCounter)
+                );
             }
         );
     }
@@ -119,21 +131,42 @@ var outputWriter = new OutputWriter(
     }
 );
 
+fileParser.on(
+    'success',
+    function(modules, data) {
+        ++parsedFileCounter;
+
+        outputWriter.write(modules, data);
+    }
+);
+
+fileParser.on(
+    'failure',
+    function(data) {
+        ++failedFileCounter;
+    }
+);
+
 function extractFileModules(fileName) {
     fs.readFile(
         fileName,
         function(err, content) {
+            ++totalFileCounter;
+
             if (err) {
                 console.log('Cannot read file: ' + fileName + '.\n' + err);
 
                 return;
             }
 
-            console.log('Parsing file: ' + fileName);
+            console.log('Parsing: ' + fileName);
 
-            var modules = fileParser.parse(content);
-
-            outputWriter.write(fileName, modules, stream);
+            fileParser.parse(
+                content,
+                {
+                    name: fileName
+                }
+            );
         }
     );
 }
