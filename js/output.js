@@ -17,11 +17,7 @@ OutputWriter.prototype = {
     write: function(fileName, modules) {
         var stream = this._config.stream;
 
-        if (this._passed) {
-            stream.write(',');
-        }
-
-        stream.write(this._indent + '"' + fileName + '": {\n');
+        stream.write((this._passed ? ',\n' : '\n') + this._indent + '"' + fileName + '": {\n');
 
         var classes = {};
         var moduleNames = {};
@@ -41,7 +37,7 @@ OutputWriter.prototype = {
             stream.write(this._indent2x + '"classes": "' + Object.keys(classes).join(', ') + '",\n');
         }
 
-        stream.write(this._indent2x + '"modules": "' + Object.keys(moduleNames).join(', ') + '"\n' + this._indent + '}\n');
+        stream.write(this._indent2x + '"modules": "' + Object.keys(moduleNames).join(', ') + '"\n' + this._indent + '}');
 
         this._passed = true;
     },

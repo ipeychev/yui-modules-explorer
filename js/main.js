@@ -129,14 +129,9 @@ function extractFileModules(fileName) {
                 return;
             }
 
-            console.log('Parsing file: ' + fileName + '.\n');
+            console.log('Parsing file: ' + fileName);
 
-            var modules = fileParser.parse(
-                content,
-                {
-                    name: fileName
-                }
-            );
+            var modules = fileParser.parse(content);
 
             outputWriter.write(fileName, modules, stream);
         }
