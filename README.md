@@ -97,6 +97,11 @@ Options:
 Changelog
 -----------
 
+ver 0.0.3
+- Traverse whole directory
+- Export modules in file
+- Bug fixing
+
 ver 0.0.2
 - Resolve modules from class attributes
 
