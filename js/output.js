@@ -11,7 +11,7 @@ OutputWriter.prototype = {
     constructor: OutputWriter,
 
     writeStart: function() {
-        this._config.stream.write('{\n');
+        this._config.stream.write('{');
     },
 
     write: function(modules, data) {
