@@ -30,8 +30,8 @@ program
   .option('-o, --out [file name]', 'The ouput file in which the information about found modules should be stored', 'modules.json')
   .option('-e, --ext [file extensions]', 'The file extensions which should be parsed. Defaults to "js".', 'js')
   .option('-j, --json [file name]', 'Path to YUI data.json file. If not specified, "./data/data.json" will be used.', './data/data.json')
+  .option('-i, --ignorenode [node string]', 'Ignore node string in files. If not speficified, "#!/usr/bin/env node" will be used.', '#!/usr/bin/env node')
   .option('-y, --yui-variable [var1,var2]', 'The name of the global YUI variable(s). Defaults to Y. Might be single value or an array.', list, ['Y'])
-  .option('-g, --generate-urls [false]', 'If specified, generate URLs using YUI Loader', false)
   .version('0.0.3')
   .parse(process.argv);
 
@@ -63,6 +63,8 @@ program.yuiVariable.forEach(
 
 modulesMap = null;
 
+console.log('Preparing YUI JSON file: ' + program.json);
+
 var data = fs.readFileSync(program.json);
 
 data = JSON.parse(data);
@@ -90,6 +92,8 @@ var fileParser = new FileParser(
         yuiClasses: yuiClasses
     }
 );
+
+console.log('Opening output stream: ' + program.out);
 
 var stream = fs.createWriteStream(
     program.out,
@@ -137,6 +141,8 @@ fileParser.on(
         ++parsedFileCounter;
 
         outputWriter.write(modules, data);
+
+        console.log('Parsed ' + data.name);
     }
 );
 
@@ -144,6 +150,8 @@ fileParser.on(
     'failure',
     function(data) {
         ++failedFileCounter;
+
+        console.log('Failed ' + data.name);
     }
 );
 
@@ -159,7 +167,11 @@ function extractFileModules(fileName) {
                 return;
             }
 
-            console.log('Parsing: ' + fileName);
+            content = content.toString();
+
+            if (content.indexOf(program.ignorenode) === 0) {
+                content = content.substring(program.ignorenode.length);
+            }
 
             fileParser.parse(
                 content,
@@ -173,11 +185,15 @@ function extractFileModules(fileName) {
 
 // 1. Extract modules from all passed files
 if (program.file) {
+    console.log('Parsing files: ' + program.file);
+
     program.file.forEach(extractFileModules);
 }
 
 // 2. Walk through the directory and extract modules from all files, which extensions match
 if (program.dir) {
+    console.log('Parsing directory: ' + program.dir);
+
     var finder = require('findit').find(program.dir);
 
     finder.on(

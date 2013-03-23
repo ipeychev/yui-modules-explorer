@@ -52,12 +52,6 @@ Y.one(...)
 
 will match "node-core".
 
-Resolving the modules
------------
-
-Resolving the modules is easy - on NodeJS we just use YUI Loader programmatically and we can not only determine the modules, but to generate the full URL.
-
-
 Running the project
 -----------
 
@@ -78,23 +72,33 @@ Usage: main.js [options]
 
 Options:
 
--f, --file [file name]          The file to parse and extract YUI modules. Defaults to the test file "./test/test.js".
+-h, --help                            output usage information
 
--d, --dir  [directory name]     The directory to traverse and extract YUI modules. Defaults to the current folder.
+-f, --file [file name]                The file to parse and extract YUI modules.
 
--e, --ext  [file extensions]    The file extensions which should be parsed. Defaults to "js".
+-d, --dir [directory name]            The directory to traverse and extract YUI modules.
 
--j, --json [file name]          Path to YUI data.json file. If not specified, "./data/data.json" will be used.
+-c, --classes [export classes]        Export class names in addition to modules
 
--y, --yui-variable [var1,var2]  The name of the global YUI variable(s). Defaults to Y. Might be single value or an array.
+-o, --out [file name]                 The ouput file in which the information about found modules should be stored
 
--g, --generate-urls [false]     If specified, generate URLs using YUI Loader.
+-e, --ext [file extensions]           The file extensions which should be parsed. Defaults to "js".
 
--V, --version                   output the version number
+-j, --json [file name]                Path to YUI data.json file. If not specified, "./data/data.json" will be used.
+
+-ignode, --ignore-node [node string]  Ignore node string in files. If not speficified, "#!/usr/bin/env node" will be used.
+
+-y, --yui-variable [var1,var2]        The name of the global YUI variable(s). Defaults to Y. Might be single value or an 
+array.
+
+-V, --version                         output the version number
 
 
 Changelog
 -----------
+
+ver 0.0.4
+- Added option to ignore node string - like "#!/usr/bin/env node"
 
 ver 0.0.3
 - Traverse whole directory
