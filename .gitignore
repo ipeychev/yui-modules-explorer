@@ -1,1 +1,3 @@
 *.sublime*
+modules.json
+node_modules
