@@ -2,8 +2,6 @@
 
 var fs = require('fs');
 
-var walk = require('walkdir');
-
 var program = require('commander');
 
 var FileParser = require('./file-parser');
@@ -67,6 +65,30 @@ var data = fs.readFileSync(program.json);
 
 data = JSON.parse(data);
 
+var yuiAliases = Object.create(null);
+
+(function addYUIAliases(classitems) {
+    classitems.forEach(
+        function(item, index) {
+            if (item['class'] === 'YUI') {
+                yuiAliases[item.name] = {
+                    module: item.module,
+                    submodule: item.submodule
+                };
+            }
+        }
+    );
+}(data.classitems));
+
+var fileParser = new FileParser(
+    {
+        data: data,
+        modulesByProperties: modulesByProperties,
+        yuiAliases: yuiAliases,
+        yuiClasses: yuiClasses
+    }
+);
+
 var stream = fs.createWriteStream(
     program.out,
     {
@@ -90,14 +112,6 @@ stream.once(
     }
 );
 
-var fileParser = new FileParser(
-    {
-        data: data,
-        modulesByProperties: modulesByProperties,
-        yuiClasses: yuiClasses
-    }
-);
-
 var outputWriter = new OutputWriter(
     {
         classes: program.classes,
@@ -115,7 +129,14 @@ function extractFileModules(fileName) {
                 return;
             }
 
-            var modules = fileParser.parse(content);
+            console.log('Parsing file: ' + fileName + '.\n');
+
+            var modules = fileParser.parse(
+                content,
+                {
+                    name: fileName
+                }
+            );
 
             outputWriter.write(fileName, modules, stream);
         }
@@ -129,17 +150,15 @@ if (program.file) {
 
 // 2. Walk through the directory and extract modules from all files, which extensions match
 if (program.dir) {
-    walk(
-        program.dir,
-        function(path, stat) {
-            if (!stat.isFile()) {
-                return;
-            }
+    var finder = require('findit').find(program.dir);
 
-            var fileExt = path.substr(path.lastIndexOf('.') + 1);
+    finder.on(
+        'file',
+        function (file, stat) {
+            var fileExt = file.substr(file.lastIndexOf('.') + 1);
 
             if (program.ext.indexOf(fileExt.toLowerCase()) >= 0) {
-                extractFileModules(path);
+                extractFileModules(file);
             }
         }
     );

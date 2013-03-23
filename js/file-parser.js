@@ -26,9 +26,11 @@ FileParser.prototype = {
 
             value = this._addIdentifiers(identifiers);
 
-            alias = node.id.name;
+            if (value) {
+                alias = node.id.name;
 
-            this._addAlias(alias, identifiers, value);
+                this._addAlias(alias, identifiers, value);
+            }
 
             return Traverse.VisitorOption.Skip;
         }
@@ -43,7 +45,11 @@ FileParser.prototype = {
     parse: function(content) {
         this._beforeCodeParse();
 
-        var ast = esprima.parse(content);
+        var ast = this._parseContent(content);
+
+        if (!ast) {
+            return [];
+        }
 
         var traverse = new Traverse(ast, this);
 
@@ -54,8 +60,6 @@ FileParser.prototype = {
 
     _beforeCodeParse: function() {
         this._aliases = Object.create(null);
-
-        this._yuiAliases = Object.create(null);
 
         this._classProperties = Object.create(null);
     },
@@ -74,7 +78,13 @@ FileParser.prototype = {
     },
 
     _addIdentifiers: function(identifiers) {
-        var i, identifierValue, item, mainIdentifier = identifiers[0];
+        var i, identifierValue, item, mainIdentifier;
+
+        if (!identifiers) {
+            return;
+        }
+
+        mainIdentifier = identifiers[0];
 
         if (!this._config.yuiClasses[mainIdentifier]) {
             return;
@@ -122,7 +132,21 @@ FileParser.prototype = {
     _explodeAlias: function(alias) {
         var result = [];
 
-        this._explodeAliasImpl(alias, result);
+        function clone(old) {
+            var hop = Object.prototype.hasOwnProperty;
+
+            var obj = Object.create(null);
+
+            for (var i in old) {
+                if (hop.call(old, i)) {
+                    obj[i] = old[i];
+                }
+            }
+
+            return obj;
+        }
+
+        this._explodeAliasImpl(alias, clone(this._aliases), result);
 
         return result;
     },
@@ -138,11 +162,13 @@ FileParser.prototype = {
     },
 
     _mergeYAliases: function(data, modules) {
-        var alias, hop = Object.prototype.hasOwnProperty, key;
+        var alias, hop = Object.prototype.hasOwnProperty, key, yuiAliases;
+
+        yuiAliases = this._config.yuiAliases;
 
         for (key in data) {
             if (hop.call(data, key)) {
-                alias = this._yuiAliases[key];
+                alias = yuiAliases[key];
 
                 if (alias) {
                     modules.push(
@@ -157,6 +183,19 @@ FileParser.prototype = {
         }
 
         return modules;
+    },
+
+    _parseContent: function(content) {
+        var ast;
+
+        try {
+            ast = esprima.parse(content);
+        }
+        catch(e) {
+            console.log('Failed to parse this content: ' + content);
+        }
+
+        return ast;
     },
 
     _processArrayExpression: function(node, parent) {
@@ -202,6 +241,9 @@ FileParser.prototype = {
         if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression') {
             identifiers = this._processMemberExpression(node.callee, node);
         }
+        else if(node.type === 'CallExpression' && node.callee.type === 'CallExpression') {
+            identifiers = this._processCallExpressionArguments(node.callee, node);
+        }
         else if(node.type === 'CallExpression' && node.callee.type === 'Identifier') {
             identifiers = [node.callee.name];
         }
@@ -232,11 +274,7 @@ FileParser.prototype = {
         expression = node.expression;
 
         if (expression.type === 'CallExpression') {
-            identifiers = this._processCallExpression(expression, node);
-
-            if (!identifiers) {
-                debugger;
-            }
+            identifiers = this._processCallExpressionArguments(expression, node);
 
             this._addIdentifiers(identifiers);
 
@@ -333,8 +371,8 @@ FileParser.prototype = {
         }
     },
 
-    _explodeAliasImpl: function(alias, result) {
-        var data = this._aliases[alias];
+    _explodeAliasImpl: function(alias, aliases, result) {
+        var data = aliases[alias];
 
         if (!data) {
             result.push(alias);
@@ -342,9 +380,11 @@ FileParser.prototype = {
             return;
         }
 
+        aliases[alias] = null;
+
         data.identifiers.forEach(
             function(item, index) {
-                this._explodeAliasImpl(item, result);
+                this._explodeAliasImpl(item, aliases, result);
             },
             this
         );
