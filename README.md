@@ -72,26 +72,25 @@ Usage: main.js [options]
 
 Options:
 
--h, --help                            output usage information
+-h, --help                      output usage information
 
--f, --file [file name]                The file to parse and extract YUI modules.
+-f, --file [file name]          The file to parse and extract YUI modules.
 
--d, --dir [directory name]            The directory to traverse and extract YUI modules.
+-d, --dir [directory name]      The directory to traverse and extract YUI modules.
 
--c, --classes [export classes]        Export class names in addition to modules
+-c, --classes [export classes]  Export class names in addition to modules
 
--o, --out [file name]                 The ouput file in which the information about found modules should be stored
+-o, --out [file name]           The ouput file in which the information about found modules should be stored
 
--e, --ext [file extensions]           The file extensions which should be parsed. Defaults to "js".
+-e, --ext [file extensions]     The file extensions which should be parsed. Defaults to "js".
 
--j, --json [file name]                Path to YUI data.json file. If not specified, "./data/data.json" will be used.
+-j, --json [file name]          Path to YUI data.json file. If not specified, "./data/data.json" will be used.
 
--ignode, --ignore-node [node string]  Ignore node string in files. If not speficified, "#!/usr/bin/env node" will be used.
+-i, --ignorenode [node string]  Ignore node string in files. If not speficified, "#!/usr/bin/env node" will be used.
 
--y, --yui-variable [var1,var2]        The name of the global YUI variable(s). Defaults to Y. Might be single value or an 
-array.
+-y, --yui-variable [var1,var2]  The name of the global YUI variable(s). Defaults to Y. Might be single value or an array.
 
--V, --version                         output the version number
+-V, --version                   output the version number
 
 
 Changelog
