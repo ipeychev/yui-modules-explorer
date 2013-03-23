@@ -32,7 +32,7 @@ program
   .option('-j, --json [file name]', 'Path to YUI data.json file. If not specified, "./data/data.json" will be used.', './data/data.json')
   .option('-i, --ignorenode [node string]', 'Ignore node string in files. If not speficified, "#!/usr/bin/env node" will be used.', '#!/usr/bin/env node')
   .option('-y, --yui-variable [var1,var2]', 'The name of the global YUI variable(s). Defaults to Y. Might be single value or an array.', list, ['Y'])
-  .version('0.0.3')
+  .version('0.0.4')
   .parse(process.argv);
 
 if (!program.file && !program.dir) {
