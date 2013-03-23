@@ -109,5 +109,5 @@ ver 0.0.2
 - Resolve modules from class attributes
 
 
-Current version - 0.0.3
+Current version - 0.0.4
 -----------
