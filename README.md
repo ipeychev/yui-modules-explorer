@@ -63,6 +63,18 @@ Running the project
 
 If you run main.js without options, it will print the result of parsing the example file in "test" folder.
 
+Examples
+-----------
+This command will parse the whole YUI src folder and will create a file, called "modules.json" with the extracted modules for each JavaScript file:
+
+	$ node js/main.js -d ~/projects/yui/yui3/src
+
+The following command will parse only one file:
+
+	$ node js/main.js -f demo/demo.js
+
+You can specify more than one file. See below the command line options for more information
+
 Command line options (view these via node js/main.js -h)
 -----------
 
