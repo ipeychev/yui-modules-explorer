@@ -23,33 +23,25 @@ OutputWriter.prototype = {
 
         stream.write(this._indent + '"' + fileName + '": {\n');
 
-        var classes = '';
-        var moduleNames = '';
+        var classes = {};
+        var moduleNames = {};
 
         modules.forEach(
             function(module) {
                 if (this._config.classes) {
-                    if (classes) {
-                        classes += ', ';
-                    }
-
-                    classes += module.className;
+                    classes[module.className] = 1;
                 }
 
-                if (moduleNames) {
-                    moduleNames += ', ';
-                }
-
-                moduleNames += module.submodule ? module.submodule : module.module;
+                moduleNames[module.submodule ? module.submodule : module.module] = 1;
             },
             this
         );
 
         if (this._config.classes) {
-            stream.write(this._indent2x + '"classes": "' + classes + '",\n');
+            stream.write(this._indent2x + '"classes": "' + Object.keys(classes).join(', ') + '",\n');
         }
 
-        stream.write(this._indent2x + '"modules": "' + moduleNames + '"\n' + this._indent + '}\n');
+        stream.write(this._indent2x + '"modules": "' + Object.keys(moduleNames).join(', ') + '"\n' + this._indent + '}\n');
 
         this._passed = true;
     },
