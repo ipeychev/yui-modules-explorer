@@ -65,7 +65,7 @@ Running the project
 2. Install esprima - npm install esprima
 3. Install YUI - npm install yui
 4. Install Commander - npm install commander
-5. Install walkdir - npm install walkdir
+5. Install findit - npm install findit
 6. Run "node js/main.js"
 
 If you run main.js without options, it will print the result of parsing the example file in "test" folder.
