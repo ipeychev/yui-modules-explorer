@@ -42,15 +42,13 @@ if (!program.file && !program.dir) {
 }
 
 var modulesByProperties = [];
-var yuiClasses = [];
+var yuiAliases = Object.create(null);
 var totalFileCounter = 0;
 var parsedFileCounter = 0;
 var failedFileCounter = 0;
 
 program.yuiVariable.forEach(
     function(item, index) {
-        yuiClasses[item] = Object.create(null);
-
         modulesMap.forEach(
             function(globalVar) {
                 globalVar.variable.unshift(item);
@@ -69,8 +67,6 @@ var data = fs.readFileSync(program.json);
 
 data = JSON.parse(data);
 
-var yuiAliases = Object.create(null);
-
 (function addYUIAliases(classitems) {
     classitems.forEach(
         function(item, index) {
@@ -83,15 +79,6 @@ var yuiAliases = Object.create(null);
         }
     );
 }(data.classitems));
-
-var fileParser = new FileParser(
-    {
-        data: data,
-        modulesByProperties: modulesByProperties,
-        yuiAliases: yuiAliases,
-        yuiClasses: yuiClasses
-    }
-);
 
 console.log('Opening output stream: ' + program.out);
 
@@ -135,26 +122,6 @@ var outputWriter = new OutputWriter(
     }
 );
 
-fileParser.on(
-    'success',
-    function(modules, data) {
-        ++parsedFileCounter;
-
-        outputWriter.write(modules, data);
-
-        console.log('Parsed ' + data.name);
-    }
-);
-
-fileParser.on(
-    'failure',
-    function(data) {
-        ++failedFileCounter;
-
-        console.log('Failed ' + data.name);
-    }
-);
-
 function extractFileModules(fileName) {
     fs.readFile(
         fileName,
@@ -172,6 +139,35 @@ function extractFileModules(fileName) {
             if (content.indexOf(program.ignorenode) === 0) {
                 content = content.substring(program.ignorenode.length);
             }
+
+            var fileParser = new FileParser(
+                {
+                    data: data,
+                    modulesByProperties: modulesByProperties,
+                    yuiAliases: yuiAliases,
+                    yuiVariables: program.yuiVariable
+                }
+            );
+
+            fileParser.on(
+                'success',
+                function(modules, data) {
+                    ++parsedFileCounter;
+
+                    outputWriter.write(modules, data);
+
+                    console.log('Parsed ' + data.name);
+                }
+            );
+
+            fileParser.on(
+                'failure',
+                function(data) {
+                    ++failedFileCounter;
+
+                    console.log('Failed ' + data.name);
+                }
+            );
 
             fileParser.parse(
                 content,

@@ -63,6 +63,15 @@ FileParser.prototype.parse = function(content, data) {
 };
 
 FileParser.prototype._beforeCodeParse = function() {
+    this._yuiClasses = Object.create(null);
+
+    this._config.yuiVariables.forEach(
+        function(item, index) {
+            this._yuiClasses[item] = Object.create(null);
+        },
+        this
+    );
+
     this._aliases = Object.create(null);
 
     this._classProperties = Object.create(null);
@@ -76,8 +85,8 @@ FileParser.prototype._addAlias = function(alias, identifiers, value) {
         };
     }
 
-    if (!this._config.yuiClasses[alias]) {
-        this._config.yuiClasses[alias] = value;
+    if (!this._yuiClasses[alias]) {
+        this._yuiClasses[alias] = value;
     }
 };
 
@@ -90,11 +99,11 @@ FileParser.prototype._addIdentifiers = function(identifiers) {
 
     mainIdentifier = identifiers[0];
 
-    if (!this._config.yuiClasses[mainIdentifier]) {
+    if (!this._yuiClasses[mainIdentifier]) {
         return;
     }
 
-    identifierValue = this._config.yuiClasses[mainIdentifier];
+    identifierValue = this._yuiClasses[mainIdentifier];
 
     for (i = 1; i < identifiers.length; i++) {
         item = identifiers[i];
@@ -233,7 +242,7 @@ FileParser.prototype._processAssignmentExpression = function(node, parent) {
             leftExpression = node.left;
 
             if (leftExpression.type === 'Identifier') {
-                this._config.yuiClasses[leftExpression.name] = this._config.yuiClasses[rightIdentifier];
+                this._yuiClasses[leftExpression.name] = this._yuiClasses[rightIdentifier];
             }
         }
     }
@@ -474,7 +483,7 @@ FileParser.prototype._resolveModules = function() {
         this
     );
 
-    return this._getModules(this._config.yuiClasses.Y, dataClasses, this._values(modulesFromClassProperties));
+    return this._getModules(this._yuiClasses.Y, dataClasses, this._values(modulesFromClassProperties));
 };
 
 FileParser.prototype._values = function(obj) {
