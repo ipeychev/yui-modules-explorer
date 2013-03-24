@@ -59,26 +59,34 @@ program.yuiVariable.forEach(
     }
 );
 
-modulesMap = null;
-
 console.log('Preparing YUI JSON file: ' + program.json);
 
 var data = fs.readFileSync(program.json);
 
 data = JSON.parse(data);
 
-(function addYUIAliases(classitems) {
-    classitems.forEach(
-        function(item, index) {
-            if (item['class'] === 'YUI') {
-                yuiAliases[item.name] = {
-                    module: item.module,
-                    submodule: item.submodule
-                };
-            }
+var htModules = Object.create(null);
+
+data.classitems = data.classitems.filter(
+    function(item, index) {
+        if (item['class'] === 'YUI') {
+            yuiAliases[item.name] = {
+                module: item.module,
+                submodule: item.submodule
+            };
         }
-    );
-}(data.classitems));
+
+        var result = modulesMap.some(
+            function(moduleItem, moduleItemindex) {
+                if (!htModules[moduleItem] && item['class'] === moduleItem['class']) {
+                    return true;
+                }
+            }
+        );
+
+        return result;
+    }
+);
 
 console.log('Opening output stream: ' + program.out);
 
