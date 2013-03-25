@@ -1,0 +1,29 @@
+{
+  "name": "yme",
+  "version": "0.0.5",
+  "description": "YUI Modules Explorer automatically discovers the required modules of YUI based projects by parsing JavaScript source files",
+  "main": "index.js",
+  "bin": {
+    "yui-modules-explorer": "yme.js"
+  },
+  "dependencies": {
+    "commander": "~1.1.1",
+    "findit": "~0.1.2",
+    "esprima": "~1.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ipeychev/yui-modules-explorer.git"
+  },
+  "keywords": [
+    "yui",
+    "modules",
+    "yuilibrary"
+  ],
+  "author": "Iliyan Peychev <iliyan.peychev@gmail.com>",
+  "license": "BSD"
+}

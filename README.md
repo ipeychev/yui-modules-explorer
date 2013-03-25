@@ -1,17 +1,17 @@
-YUI Modules Explorer: Automatically discover the required YUI3 modules from JavaScript source files
+YUI Modules Explorer: Automatically discovers the required YUI3 modules from JavaScript source files
 ========================================
 
-Modules Explorer is a project which tries to save the developer from the monkey job of finding and populating the required YUI modules in JavaScript sources. What it does is to parse the JavaScript files using [esprima](http://esprima.org/) JavaScript parser and to match the used YUI classes to the required modules.
+YUI Modules Explorer (YME) is a project which tries to save the developer from the monkey job of finding and populating the required YUI modules in JavaScript sources. What it does is to parse the JavaScript files using [esprima](http://esprima.org/) JavaScript parser and to match the used YUI classes to the required modules.
 
 Currently the developers are doing this manually - they look at YUI documentation, use YUI Configurator or copy and paste from the examples. The downsides of this approach are:
-* Leads to errors and misconfigurations - it is not easy to determine the right combination of modules and for that reason developers often add wrong modules or they add modules inefficiently. This even happens with the modules inside YUI [for example Dial](http://www.yuiblog.com/blog/2011/07/01/yui-and-loader-changes-for-3-4-0/)
-* It is time consuming - determining the right combination of modules requires time
+* Leads to errors and misconfigurations - it is not easy to determine the right combination of modules and for that reason developers often add wrong modules or they add more modules than neeed which only increases the network traffic. This even happens with the modules inside YUI [for example Dial](http://www.yuiblog.com/blog/2011/07/01/yui-and-loader-changes-for-3-4-0/)
+* It is time consuming - determining the right combination of modules requires time and efforts
 
-How does this work?
+How does YME work?
 -----------
 
 1. It parses the JavaScript files and looks for YUI Classes.
-2. It matches these classes to the modules in which they exists.
+2. It matches these classes to the modules in which they exists looking in data.json file, produced by [YUIDoc](http://yui.github.com/yuidoc/args/index.html#working-with-yuidoc-parsed-data).
 
 Examples:
 
@@ -23,7 +23,7 @@ var overlay = new Y.Overlay({
 });
 ```
 
-In this case Y.Overlay is used. The required module should be "overlay".
+In this case only one YUI class is used - Y.Overlay. So, he required module should be "overlay".
 
 ##### Resolving modules from values of class attributes:
 
@@ -55,35 +55,23 @@ will match "node-core".
 Running the project
 -----------
 
-1. Install NodeJS
-2. Install esprima - npm install esprima
-3. Install Commander - npm install commander
-4. Install findit - npm install findit
-5. Run "node js/main.js"
-
-If you run main.js without options, it will print the result of parsing the example file in "test" folder.
+1. Install the module - "npm install -g yme"
+5. Run "yme" with some parameters (see below for the list of command line options)
 
 Examples
 -----------
-This command will parse the whole YUI src folder and will create a file, called "modules.json" with the extracted modules for each JavaScript file:
+This command will parse the whole YUI src folder and will create a file, called "modules.json" with the extracted modules from each JavaScript file:
 
-	$ node js/main.js -d ~/projects/yui/yui3/src
+	$ yme -d ~/projects/yui/yui3/src
 
 The following command will parse only one file:
 
-	$ node js/main.js -f demo/demo.js
+	$ yme -f demo/demo.js
 
-You can specify more than one file. See below the command line options for more information
+You can specify more than one file by separating them with commas. See below the command line options for more information
 
-Command line options (view these via node js/main.js -h)
+Command line options (view these via yme -h)
 -----------
-
-node js/main.js -h
-
-Usage: main.js [options]
-
-Options:
-
 
 -f, --file [file1,file2] - The file(s) to parse and extract YUI modules.
 
@@ -109,6 +97,9 @@ Options:
 Changelog
 -----------
 
+ver 0.0.5
+- Created NPM Package
+
 ver 0.0.4
 - Added option to ignore node string - like "#!/usr/bin/env node"
 
@@ -121,5 +112,5 @@ ver 0.0.2
 - Resolve modules from class attributes
 
 
-Current version - 0.0.4
+Current version - 0.0.5
 -----------
