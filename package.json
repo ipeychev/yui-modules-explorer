@@ -4,7 +4,7 @@
   "description": "YUI Modules Explorer automatically discovers the required modules of YUI based projects by parsing JavaScript source files",
   "main": "index.js",
   "bin": {
-    "yui-modules-explorer": "yme.js"
+    "yme": "./bin/yme.js"
   },
   "dependencies": {
     "commander": "~1.1.1",
@@ -15,6 +15,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "preferGlobal": true,
   "repository": {
     "type": "git",
     "url": "git://github.com/ipeychev/yui-modules-explorer.git"

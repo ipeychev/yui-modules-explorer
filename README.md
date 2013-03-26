@@ -4,6 +4,7 @@ YUI Modules Explorer: Automatically discovers the required YUI3 modules from Jav
 YUI Modules Explorer (YME) is a project which tries to save the developer from the monkey job of finding and populating the required YUI modules in JavaScript sources. What it does is to parse the JavaScript files using [esprima](http://esprima.org/) JavaScript parser and to match the used YUI classes to the required modules.
 
 Currently the developers are doing this manually - they look at YUI documentation, use YUI Configurator or copy and paste from the examples. The downsides of this approach are:
+
 * Leads to errors and misconfigurations - it is not easy to determine the right combination of modules and for that reason developers often add wrong modules or they add more modules than neeed which only increases the network traffic. This even happens with the modules inside YUI [for example Dial](http://www.yuiblog.com/blog/2011/07/01/yui-and-loader-changes-for-3-4-0/)
 * It is time consuming - determining the right combination of modules requires time and efforts
 
