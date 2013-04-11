@@ -99,8 +99,7 @@ Changelog
 -----------
 
 ver 0.0.6
-- Dependencies are now in 'requires' format
- Proposed by Satyam (https://github.com/ipeychev/yui-modules-explorer/issues/5)
+- Dependencies are now in 'requires' format. Proposed by Satyam (https://github.com/ipeychev/yui-modules-explorer/issues/5)
 
 ver 0.0.5
 - Created NPM Package
