@@ -1,6 +1,6 @@
 {
   "name": "yme",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "YUI Modules Explorer automatically discovers the required modules of YUI based projects by parsing JavaScript source files",
   "main": "index.js",
   "bin": {
