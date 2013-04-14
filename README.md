@@ -24,7 +24,7 @@ var overlay = new Y.Overlay({
 });
 ```
 
-In this case only one YUI class is used - Y.Overlay. So, he required module should be "overlay".
+In this case only one YUI class is used - Y.Overlay. So, the required module should be "overlay".
 
 ##### Resolving modules from values of class attributes:
 
